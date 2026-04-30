@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+@keyframes slow-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-slow-float {
+  animation: slow-float 6s ease-in-out infinite;
+}
+

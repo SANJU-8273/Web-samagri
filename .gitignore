@@ -1,0 +1,61 @@
+# ========================
+# ENV FILES (VERY IMPORTANT)
+# ========================
+.env
+.env.*
+!.env.example
+
+# ========================
+# NODE MODULES
+# ========================
+node_modules/
+**/node_modules/
+
+# ========================
+# NEXT.JS (FRONTEND)
+# ========================
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/.vercel/
+
+# ========================
+# LOG FILES
+# ========================
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ========================
+# OS FILES
+# ========================
+.DS_Store
+Thumbs.db
+
+# ========================
+# IDE / EDITOR FILES
+# ========================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ========================
+# BACKEND FILES
+# ========================
+backend/uploads/
+backend/tmp/
+backend/*.log
+
+# ========================
+# CACHE
+# ========================
+.cache/
+.parcel-cache/
+
+# ========================
+# TEST / COVERAGE
+# ========================
+coverage/
