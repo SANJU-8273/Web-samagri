@@ -2,14 +2,9 @@ import dotenv from "dotenv";
 dotenv.config()
 import path from "path";
 import express from "express";
-
-import colors from "colors";
 import morgan from "morgan";
 import cors from "cors";
-
 import connectDB from "./config/db.js";
-
-// ✅ ROUTES IMPORT
 import productRoutes from "./routes/productRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
@@ -24,26 +19,24 @@ connectDB();
 
 const app = express();
 
-/* =========================
-   MIDDLEWARE
-========================= */
-
-// ✅ CORS (frontend connect)
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: [
+      "http://localhost:3000",
+      "https://web-samagri.vercel.app",
+    ],
     credentials: true,
   })
 );
 
-// ✅ BODY PARSER (IMPORTANT)
+
 app.use(express.json());
 
 /* =========================
    DEV LOGGING
 ========================= */
 if (process.env.NODE_ENV === "development") {
-  app.use(morgan("dev"));
+   app.use(morgan("dev"));
 }
 
 /* =========================
@@ -68,7 +61,7 @@ app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
    ROOT
 ========================= */
 app.get("/", (req, res) => {
-  res.send("API is running...");
+   res.send("API is running...");
 });
 
 /* =========================
@@ -83,8 +76,8 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(
-    `🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`
-      .yellow.bold
-  );
+   console.log(
+      `🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`
+         .yellow.bold
+   );
 });
