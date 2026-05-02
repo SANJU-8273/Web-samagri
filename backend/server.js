@@ -23,7 +23,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000",
-      "https://web-samagri.vercel.app",
+      "https://samagri-store.vercel.app",
     ],
     credentials: true,
   })
