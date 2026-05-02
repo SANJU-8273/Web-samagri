@@ -33,7 +33,7 @@ useEffect(() => {
     const res = await fetch(`http://localhost:5000/api/products/${id}`);
     const data = await res.json();
 setProduct(data);
-setActive(data.image);  };
+setActive(data.images?.[0]);  };
 
   const fetchAllProducts = async () => {
     const res = await fetch("http://localhost:5000/api/products");
@@ -72,11 +72,9 @@ const [active, setActive] = useState("");
   // Similar Products (same category, excluding current)
 const similarProducts = allProducts
 .filter((p) => p.category === product.category && p._id !== product._id)    .slice(0, 4);
-
-  const images = product
-  ? [product.image, product.image, product.image, product.image]
-  : [];
-
+const images = product?.images?.length
+  ? product.images
+  : ["/placeholder.png"];
   return (
     <div className="bg-gradient-to-b mx-auto container from-[#FDF6E8] via-[#F4E2B8] to-[#E6D4AC] min-h-screen">
       <div className="max-w-6xl lg:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 pt-6 lg:pt-10">
@@ -133,8 +131,12 @@ const similarProducts = allProducts
               {/* Main Image */}
               <div className="flex-1 order-1 sm:order-2">
                 <div className="aspect-square rounded-3xl bg-gradient-to-br from-[#FFF7E2] via-[#FBE3B2] to-[#F2CF7D] border border-[#E7C98C] overflow-hidden relative">
-                  <img src={active} className="w-full h-full object-cover" alt={product.name} />
-                </div>
+                 <img
+  src={active || "/placeholder.png"}
+  className="w-full h-full object-cover"
+  alt={product.name}
+/>
+                   </div>
               </div>
 
             </div>
@@ -493,7 +495,7 @@ const similarProducts = allProducts
                 <div className="w-8 h-0.5 bg-gradient-to-r from-[#C89A3A] to-[#E4C786] rounded-full"></div>
 
                 <h2 className="text-[20px] sm:text-[28px] lg:text-[32px] font-semibold text-[#2B1A0F] tracking-tight leading-snug">
-                  Similar Products
+                  You Might Also Like
                 </h2>
 
                 <p className="text-[11px] sm:text-[13px] text-gray-600">

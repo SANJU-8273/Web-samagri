@@ -1,107 +1,105 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const reviewSchema = mongoose.Schema(
   {
     name: { type: String, required: true },
     rating: { type: Number, required: true },
     comment: { type: String, required: true },
+
     user: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String, // 🔥 clerkId (FIXED)
       required: true,
-      ref: 'User'
-    }
+    },
   },
-  {
-    timestamps: true
-  }
+  { timestamps: true }
 );
 
 const productSchema = mongoose.Schema(
   {
     user: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String, // 🔥 clerkId (FIXED)
       required: true,
-      ref: 'User'
     },
+
+    shop: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "Shop",
+  required: false,
+},
 
     name: {
       type: String,
-      required: true
+      required: true,
     },
 
-    image: {
-      type: String,
-      required: true
-    },
+    images: [
+      {
+        type: String,
+        required: true,
+      },
+    ],
 
     description: {
       type: String,
-      required: true
+      required: true,
     },
 
     brand: {
       type: String,
-      required: true,
-      default: 'India Traditional'
+      default: "India Traditional",
     },
 
     category: {
       type: String,
-      required: true
+      required: true,
     },
 
     price: {
       type: Number,
       required: true,
-      default: 0
+      default: 0,
     },
 
     discount: {
       type: Number,
-      default: 0
+      default: 0,
     },
 
     countInStock: {
       type: Number,
       required: true,
-      default: 0
+      default: 0,
     },
 
     rating: {
       type: Number,
-      required: true,
-      default: 0
+      default: 0,
     },
 
     numReviews: {
       type: Number,
-      required: true,
-      default: 0
+      default: 0,
     },
 
     ecoFriendly: {
       type: Boolean,
-      default: false
+      default: false,
     },
 
     madeInIndia: {
       type: Boolean,
-      default: true
+      default: true,
     },
 
-    whatsInside: [
-      {
-        type: String
-      }
-    ],
+    whatsInside: [String],
 
-    reviews: [reviewSchema]
+    reviews: [reviewSchema],
   },
   {
-    timestamps: true
+    timestamps: true,
   }
 );
 
-const Product = mongoose.model('Product', productSchema);
+const Product =   mongoose.models.Product || mongoose.model("Product", productSchema);
 
 export default Product;

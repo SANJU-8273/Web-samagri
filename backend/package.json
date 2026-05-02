@@ -9,6 +9,7 @@
     "server": "nodemon server.js"
   },
   "dependencies": {
+    "@clerk/backend": "^3.4.4",
     "bcryptjs": "^3.0.3",
     "colors": "^1.4.0",
     "cors": "^2.8.6",

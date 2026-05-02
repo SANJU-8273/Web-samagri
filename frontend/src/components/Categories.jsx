@@ -1,130 +1,163 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-import { Flower2 } from "lucide-react";
+import { Flower2, MapPin, Loader2, ArrowRight } from "lucide-react";
 import { categoryData } from "../data/CategoryData";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Categories() {
+  const [showModal, setShowModal] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const router = useRouter();
+
+  const handleCategoryClick = (categoryName) => {
+    const location = JSON.parse(localStorage.getItem("userLocation"));
+
+    if (!location || !location.lat) {
+      setSelectedCategory(categoryName);
+      setShowModal(true);
+    } else {
+      router.push(
+        `/shop?category=${encodeURIComponent(categoryName)}&lat=${location.lat}&lng=${location.lng}`
+      );
+    }
+  };
+
+  const handleGetLocation = () => {
+    setLoading(true);
+    setError("");
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const locationData = {
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        };
+
+        localStorage.setItem("userLocation", JSON.stringify(locationData));
+        setShowModal(false);
+        setLoading(false);
+
+        router.push(
+          `/shop?category=${encodeURIComponent(selectedCategory)}&lat=${locationData.lat}&lng=${locationData.lng}`
+        );
+      },
+      () => {
+        setError("Location permission denied. Please allow location access.");
+        setLoading(false);
+      }
+    );
+  };
+
   return (
-    <section className="py-10 bg-gradient-to-b from-[#FFF8F0] to-[#FDEEDC]">
-      <div className="container mx-auto px-6 lg:px-12">
+    <section className="relative overflow-hidden py-16 bg-[#FFF8EF]">
+      <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-orange-200/40 blur-3xl" />
+      <div className="absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-yellow-200/50 blur-3xl" />
 
-   {/* ---------------- SECTION TITLE ---------------- */}
-<div className="text-center mb-14">
+      <div className="relative container mx-auto px-4 sm:px-6 lg:px-12">
+        <div className="text-center mb-12">
+          <span className="inline-flex items-center gap-2 rounded-full bg-orange-100 px-4 py-2 text-sm font-semibold text-orange-700">
+            <Flower2 size={16} />
+            Sacred Collection
+          </span>
 
-  {/* HEADING */}
- <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-  Sacred Puja Collections
-</h2>
+          <h2 className="mt-4 text-3xl md:text-5xl font-extrabold tracking-tight text-gray-900">
+            Shop by Puja Category
+          </h2>
 
+          <p className="mt-3 text-gray-600 text-sm md:text-base max-w-2xl mx-auto">
+            Premium pooja essentials, kits and decor items crafted for daily rituals and festivals.
+          </p>
+        </div>
 
+        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {categoryData.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => handleCategoryClick(cat.name)}
+              className="group text-left rounded-3xl bg-white shadow-md hover:shadow-2xl border border-orange-100 overflow-hidden transition-all duration-300 hover:-translate-y-1"
+            >
+              <div className="relative h-56 w-full overflow-hidden bg-orange-50">
+                <Image
+                  src={cat.image}
+                  alt={cat.name}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 25vw"
+                  className="object-cover transition-transform duration-700 group-hover:scale-110"
+                />
 
-  {/* DECORATIVE DIVIDER */}
-  <div className="flex items-center justify-center gap-4">
-    <div className="h-0.5 w-16 bg-gray-300" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent" />
 
-    <Flower2 className="h-6 w-6 text-amber-600" />
+                <div className="absolute bottom-4 left-4 right-4">
+                  <h3 className="text-white text-xl font-bold drop-shadow">
+                    {cat.name}
+                  </h3>
+                </div>
+              </div>
 
-    <div className="h-0.5 w-16 bg-gray-300" />
-  </div>
+              <div className="p-5 bg-gradient-to-br from-white to-orange-50">
+                <p className="text-sm text-gray-600 line-clamp-2 min-h-[40px]">
+                  {cat.description}
+                </p>
 
-  {/* SUBTEXT */}
-  <p className="mt-3 text-gray-500 text-sm md:text-base max-w-xl mx-auto">
-    Explore premium categories crafted with care for your rituals, festivals, and daily devotion.
-  </p>
-</div>
+                <div className="mt-4 flex items-center justify-between">
+                  <span className="text-sm font-semibold text-orange-600">
+                    Explore Products
+                  </span>
 
-
-
-        {/* Category Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 md:gap-8">
-  {categoryData.map((cat) => (
-    <Link
-      key={cat.id}
-      href={`/shop?category=${encodeURIComponent(cat.name)}`}
-      className="
-        group relative rounded-2xl 
-        border border-[#E5C28A]/40 
-        shadow-lg hover:shadow-2xl 
-        transition-all duration-500 
-        overflow-hidden flex flex-col
-        bg-white/60 backdrop-blur-md
-      "
-    >
-      {/* Image Wrapper */}
-      <div className="
-        relative h-36 sm:h-44 md:h-52 lg:h-56 overflow-hidden rounded-t-2xl
-      ">
-        <Image
-          src={cat.image}
-          alt={cat.name}
-          fill
-          className="
-            object-cover transition-all duration-700
-            group-hover:scale-110 
-            group-hover:brightness-[0.85]
-          "
-        />
-
-        {/* Soft Gold Overlay */}
-        <div className="
-          absolute inset-0 
-          bg-gradient-to-t 
-          from-[#5C1A1B]/60 via-transparent to-transparent
-          opacity-60
-        " />
+                  <span className="h-9 w-9 rounded-full bg-orange-500 text-white flex items-center justify-center group-hover:bg-orange-600 transition">
+                    <ArrowRight size={17} />
+                  </span>
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Text Wrapper (UPDATED BG HERE) */}
-      <div
-  className="
-    p-3 sm:p-4 text-center flex-1 flex flex-col justify-center
-    bg-gradient-to-br from-[#FFF4D6] via-[#FFE9AD] to-[#FFDD85]
-    group-hover:from-[#FFE39A] group-hover:via-[#FFD067] group-hover:to-[#FFBE3F]
-    transition-all duration-500
-  "
->
-  <h3
-    className="
-      text-sm sm:text-lg font-semibold 
-      text-black
-      mb-1 sm:mb-2 transition-all
-      group-hover:text-[#7A2E00]   /* subtle saffron-brown hover */
-    "
-  >
-    {cat.name}
-  </h3>
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+          <div className="w-full max-w-md rounded-3xl bg-white p-6 sm:p-8 shadow-2xl">
+            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-orange-100">
+              <MapPin className="text-orange-600" size={26} />
+            </div>
 
-  <p
-    className="
-      text-[11px] sm:text-sm 
-      text-black/70
-      leading-relaxed line-clamp-2
-    "
-  >
-    {cat.description}
-  </p>
-</div>
+            <h2 className="text-2xl font-bold text-center text-gray-900">
+              Allow Location Access
+            </h2>
 
+            <p className="mt-2 text-center text-sm text-gray-500">
+              We’ll show nearby shops and available products for your selected category.
+            </p>
 
+            {error && (
+              <div className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-center text-sm text-red-600">
+                {error}
+              </div>
+            )}
 
-      {/* Gold Glow Border */}
-      <div
-        className="
-          absolute inset-0 
-          border-2 border-[#D4AF37] rounded-2xl 
-          opacity-0 group-hover:opacity-100 
-          transition-all duration-500 
-          shadow-[0_0_12px_#D4AF37]
-        "
-      />
-    </Link>
-  ))}
-</div>
+            <button
+              onClick={handleGetLocation}
+              disabled={loading}
+              className="mt-6 w-full flex items-center justify-center gap-2 rounded-2xl bg-orange-500 py-3.5 font-semibold text-white shadow-lg shadow-orange-200 hover:bg-orange-600 disabled:bg-gray-300 disabled:shadow-none transition"
+            >
+              {loading && <Loader2 className="animate-spin" size={18} />}
+              {loading ? "Fetching Location..." : "Use Current Location"}
+            </button>
 
-
-      </div>
+            <button
+              onClick={() => setShowModal(false)}
+              className="mt-3 w-full rounded-2xl py-3 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </section>
   );
-}  
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ShoppingCart, Star, Tag, Plus, Minus } from "lucide-react";
+import { Star, Tag, Plus, Minus, MapPin } from "lucide-react";
 import ImageWithFallback from "./Fallback/ImageWithFallback";
 import { useCart } from "../app/context/CartContext";
 import { useState } from "react";
@@ -14,87 +14,120 @@ export default function ProductCard({ product }) {
   const { user } = useUser();
   const { openSignIn } = useClerk();
 
-  const discount = product.discount || 12;
-  const originalPrice = Math.round(
-    (product.price * (100 + discount)) / 100
-  );
+  const discount = product.discount || 0;
+
+  const originalPrice =
+    discount > 0
+      ? Math.round((product.price * 100) / (100 - discount))
+      : product.price;
+
+  const imageUrl = product.images?.[0] || "/placeholder.png";
 
   const increaseQty = () => setQty((p) => p + 1);
   const decreaseQty = () => setQty((p) => (p > 1 ? p - 1 : 1));
 
   return (
-    <div className="bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-2xl hover:shadow-md transition-all duration-300">
-
+    <div className="overflow-hidden rounded-2xl border border-orange-100 bg-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
       <Link href={`/shop/${product._id}`}>
-        <div className="relative aspect-square bg-gray-100 overflow-hidden rounded">
+        <div className="relative aspect-square overflow-hidden bg-gray-100">
           <ImageWithFallback
-            src={product.image}
+            src={imageUrl}
             alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-500"
+            className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
           />
 
-          <span className="absolute top-2 left-2 bg-red-600 text-white text-[10px] px-1.5 py-[1.5px] rounded-full font-semibold flex items-center gap-1 shadow-sm">
-            <Tag className="h-3 w-3" />
-            {discount}% OFF
-          </span>
+          {discount > 0 && (
+            <span className="absolute left-2 top-2 flex items-center gap-1 rounded-full bg-red-600 px-2 py-1 text-[10px] font-bold text-white shadow-sm">
+              <Tag className="h-3 w-3" />
+              {discount}% OFF
+            </span>
+          )}
+
+          {product.countInStock <= 0 && (
+            <span className="absolute right-2 top-2 rounded-full bg-gray-900 px-2 py-1 text-[10px] font-bold text-white">
+              Out of Stock
+            </span>
+          )}
         </div>
       </Link>
 
-      <div className="px-2.5 py-2.5 bg-gradient-to-br from-[#FFF4D6] via-[#FFE9AD] to-[#FFDD85] rounded-b-2xl">
-
+      <div className="rounded-b-2xl bg-gradient-to-br from-[#FFF4D6] via-[#FFE9AD] to-[#FFDD85] px-3 py-3">
         <Link href={`/shop/${product._id}`}>
-          <h3 className="text-[12px] font-semibold text-gray-900 line-clamp-2">
+          <h3 className="line-clamp-2 text-[13px] font-bold text-gray-900">
             {product.name}
           </h3>
         </Link>
 
-        <div className="mt-1.5 flex items-center justify-between">
+        <p className="mt-1 text-[11px] font-medium text-gray-600">
+          {product.category}
+        </p>
 
+        {product.location && (
+          <p className="mt-1 flex items-center gap-1 text-[10px] text-gray-500 line-clamp-1">
+            <MapPin size={11} />
+            {product.location}
+          </p>
+        )}
+
+        <div className="mt-2 flex items-center justify-between">
           <div className="flex items-end gap-1">
-            <p className="text-[14px] font-bold text-[#3B1F1E]">
+            <p className="text-[15px] font-black text-[#3B1F1E]">
               ₹{product.price}
             </p>
 
-            <p className="text-[10px] text-gray-500 line-through">
-              ₹{originalPrice}
-            </p>
+            {discount > 0 && (
+              <p className="text-[10px] text-gray-500 line-through">
+                ₹{originalPrice}
+              </p>
+            )}
           </div>
 
-          <div className="inline-flex items-center gap-1 bg-green-50 border border-green-200 px-1.5 py-[1px] rounded-full text-[10px] font-semibold text-green-700">
+          <div className="inline-flex items-center gap-1 rounded-full border border-green-200 bg-green-50 px-1.5 py-[1px] text-[10px] font-bold text-green-700">
             <Star className="h-2.5 w-2.5 fill-green-500 text-green-500" />
-            {product.rating?.toFixed(1)}
+            {product.rating ? product.rating.toFixed(1) : "0.0"}
           </div>
         </div>
 
-        <div className="mt-2 bg-gray-100 px-2 py-1 rounded-md flex items-center justify-between border border-gray-200">
-          <span className="text-[10px] font-medium">Qty</span>
+        <div className="mt-2 flex items-center justify-between rounded-xl border border-gray-200 bg-white/70 px-2 py-1.5">
+          <span className="text-[10px] font-bold text-gray-700">Qty</span>
 
-          <div className="flex items-center gap-1.5">
-            <button onClick={decreaseQty}>
-              <Minus size={10} />
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={decreaseQty}
+              className="rounded-md bg-white p-1"
+            >
+              <Minus size={11} />
             </button>
 
-            <span>{qty}</span>
+            <span className="text-xs font-bold">{qty}</span>
 
-            <button onClick={increaseQty}>
-              <Plus size={10} />
+            <button
+              type="button"
+              onClick={increaseQty}
+              className="rounded-md bg-white p-1"
+            >
+              <Plus size={11} />
             </button>
           </div>
         </div>
 
         <div className="mt-3 grid grid-cols-2 gap-2">
-
           <button
+            type="button"
+            disabled={product.countInStock <= 0}
             onClick={(e) => {
               e.preventDefault();
               addToCart({ ...product, quantity: qty });
             }}
-            className="py-2.5 text-[12px] font-semibold rounded-md bg-white border"
+            className="rounded-xl border bg-white py-2.5 text-[12px] font-bold text-gray-800 disabled:opacity-50"
           >
             Add
           </button>
 
           <button
+            type="button"
+            disabled={product.countInStock <= 0}
             onClick={() => {
               if (!user) {
                 openSignIn({
@@ -105,7 +138,7 @@ export default function ProductCard({ product }) {
 
               window.location.href = `/CheckOut?productId=${product._id}&qty=${qty}`;
             }}
-            className="py-2.5 text-[12px] font-semibold rounded-md bg-yellow-500 text-white"
+            className="rounded-xl bg-yellow-500 py-2.5 text-[12px] font-bold text-white disabled:opacity-50"
           >
             Buy Now
           </button>

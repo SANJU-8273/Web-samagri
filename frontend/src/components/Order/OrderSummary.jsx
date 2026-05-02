@@ -36,17 +36,34 @@ export default function OrderSummary({
   const total = subtotal + gst + shipping;
 
 const handlePlaceOrder = async () => {
-  console.log("BUTTON CLICKED");
-
   try {
+    setPlacing(true);
     setError("");
 
     if (!user) {
-      console.log("User missing");
-      return setError("Please login first");
+      setError("Please login first");
+      return;
     }
 
-    console.log("Calling Payment API...");
+    if (!paymentMethod) {
+      setError("Please select payment method");
+      return;
+    }
+
+    if (!deliveryMethod) {
+      setError("Please select delivery method");
+      return;
+    }
+
+    if (!items.length) {
+      setError("Cart is empty");
+      return;
+    }
+
+    if (!window.Razorpay) {
+      setError("Razorpay script load nahi hui");
+      return;
+    }
 
     const res = await fetch("http://localhost:5000/api/payment/create", {
       method: "POST",
@@ -58,15 +75,12 @@ const handlePlaceOrder = async () => {
 
     const data = await res.json();
 
-    console.log("Payment response:", data);
-
     if (!res.ok) {
-      throw new Error("Payment API failed");
+      throw new Error(data.message || "Payment API failed");
     }
 
-    // 🔥 Razorpay open
     const options = {
-      key: "rzp_test_Sjdh0AfsQOQkfH",
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY,
       amount: data.amount,
       currency: "INR",
       name: "Samagri Store",
@@ -76,14 +90,24 @@ const handlePlaceOrder = async () => {
         console.log("Payment Success", response);
         alert("Payment Successful 🎉");
       },
+
+      prefill: {
+        name: user?.fullName || "",
+        email: user?.primaryEmailAddress?.emailAddress || "",
+      },
+
+      theme: {
+        color: "#2563eb",
+      },
     };
 
     const razor = new window.Razorpay(options);
     razor.open();
-
   } catch (err) {
     console.error("ERROR:", err);
-    setError("Something went wrong");
+    setError(err.message || "Something went wrong");
+  } finally {
+    setPlacing(false);
   }
 };
   return (

@@ -2,21 +2,38 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ShoppingCart, User, Search, Flame, Menu, X } from "lucide-react";
+import {
+  ShoppingCart,
+  User,
+  Search,
+  Flame,
+  Menu,
+  X,
+} from "lucide-react";
+
 import { useCart } from "../app/context/CartContext";
-import { UserButton, useUser, useClerk } from "@clerk/nextjs"; // ⭐ Clerk import
+import { UserButton, useUser, useClerk } from "@clerk/nextjs";
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { openCart, cartCount } = useCart();
 
-  const { user } = useUser();          // ⭐ Logged-in user check
-  const { openSignIn } = useClerk();   // ⭐ Modal open function
+  // 🔥 NEW STATES
+  const [showVendorModal, setShowVendorModal] = useState(false);
+  const [isVendor, setIsVendor] = useState(false);
+
+  const { openCart, cartCount } = useCart();
+  const { user } = useUser();
+  const { openSignIn } = useClerk();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
+
+    // 🔥 check vendor status
+    const vendor = localStorage.getItem("isVendor");
+    if (vendor === "true") setIsVendor(true);
+
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -28,115 +45,86 @@ export default function Header() {
   ];
 
   return (
-    <header
-      className={`container mx-auto fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out rounded-b-2xl ${
-        isScrolled
-          ? "bg-gradient-to-r from-[#D9C29A]/95 via-[#E8D6B3]/95 to-[#F3E5C6]/95 backdrop-blur-xl border-b border-[#C9A875]/40 shadow-sm"
-          : "bg-gradient-to-r from-[#E8D6B3]/80 via-[#F3E5C6]/80 to-[#FFF7E3]/80 backdrop-blur-md border-transparent"
-      }`}
-    >
-      <div className="container mx-auto px-4 md:px-8 flex items-center justify-between py-2.5">
+    <>
+      <header
+        className={`container mx-auto fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out rounded-b-2xl ${
+          isScrolled
+            ? "bg-gradient-to-r from-[#D9C29A]/95 via-[#E8D6B3]/95 to-[#F3E5C6]/95 backdrop-blur-xl border-b border-[#C9A875]/40 shadow-sm"
+            : "bg-gradient-to-r from-[#E8D6B3]/80 via-[#F3E5C6]/80 to-[#FFF7E3]/80 backdrop-blur-md border-transparent"
+        }`}
+      >
+        <div className="container mx-auto px-4 md:px-8 flex items-center justify-between py-2.5">
 
-        {/* Logo */}
-        <Link
-          href="/"
-          onClick={() => setIsMenuOpen(false)}
-          className="flex items-center gap-2 group select-none"
-        >
-          <Flame
-            className={`transition-all duration-300 ${
-              isScrolled ? "h-6 w-6" : "h-8 w-8"
-            } text-[#FF7A00] drop-shadow-[0_0_7px_rgba(255,122,0,0.35)] group-hover:rotate-12`}
-          />
-          <span
-            className={`font-bold bg-gradient-to-r from-[#FF7A00] to-[#C46E00] bg-clip-text text-transparent transition-all duration-300 ${
-              isScrolled ? "text-xl" : "text-2xl"
-            }`}
-          >
-            Samagri
-          </span>
-        </Link>
+          {/* LOGO */}
+          <Link href="/" className="flex items-center gap-2 group">
+            <Flame className="h-7 w-7 text-[#FF7A00]" />
+            <span className="font-bold text-xl bg-gradient-to-r from-[#FF7A00] to-[#C46E00] bg-clip-text text-transparent">
+              Samagri
+            </span>
+          </Link>
 
-        {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="relative text-[#2A1A00] font-medium text-sm tracking-wide group"
-            >
-              {link.label}
-              <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-[#D47C00] transition-all duration-300 group-hover:w-full"></span>
-            </Link>
-          ))}
-        </nav>
+          {/* NAV */}
+          <nav className="hidden md:flex items-center gap-8">
+            {navLinks.map((link) => (
+              <Link key={link.href} href={link.href} className="relative group">
+                {link.label}
+                <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-[#D47C00] group-hover:w-full transition-all"></span>
+              </Link>
+            ))}
+          </nav>
 
-        {/* Right Icons */}
-        <div className="flex items-center gap-3 sm:gap-4">
+          {/* RIGHT SIDE */}
+          <div className="flex items-center gap-3">
 
-          {/* Search */}
-          <div
-            className={`hidden lg:flex relative transition-all duration-300 ${
-              isScrolled ? "w-52" : "w-64"
-            }`}
-          >
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#2A1A00]" />
-            <input
-              type="text"
-              placeholder="Search Puja items..."
-              className="w-full pl-12 pr-4 py-2 rounded-full border border-[#00000020] bg-white text-[#2A1A00] placeholder-[#00000060] focus:outline-none focus:ring-2 focus:ring-[#D47C00]/30 text-sm"
-            />
-          </div>
-
-          {/* Cart */}
-          <button onClick={openCart} className="relative group">
-            <div className="flex items-center justify-center h-10 w-10 rounded-full border border-[#00000025] bg-white hover:scale-110 transition-all hover:shadow-md">
-              <ShoppingCart className="h-5 w-5 text-[#2A1A00]" />
+            {/* SEARCH */}
+            <div className="hidden lg:flex relative w-56">
+              <Search className="absolute left-3 top-2 text-gray-500" />
+              <input
+                placeholder="Search..."
+                className="pl-10 pr-3 py-2 w-full rounded-full border bg-white"
+              />
             </div>
 
-            {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center bg-[#D47C00] text-white text-xs font-semibold rounded-full border-2 border-white shadow-sm">
-                {cartCount}
-              </span>
-            )}
-          </button>
-
-          {/* 🔐 USER AUTH BUTTON */}
-          {user ? (
-            <UserButton
-              afterSignOutUrl="/"
-              appearance={{
-                elements: {
-                  avatarBox:
-                    "h-10 w-10 rounded-full border border-[#00000025] bg-white hover:scale-110 transition-all hover:shadow-md",
-                },
-              }}
-            />
-          ) : (
-            <button
-              onClick={() => openSignIn({})}
-              className="flex items-center justify-center h-10 w-10 rounded-full border border-[#00000025] bg-white hover:scale-110 transition-all hover:shadow-md"
-            >
-              <User className="h-5 w-5 text-[#2A1A00]" />
+            {/* CART */}
+            <button onClick={openCart} className="relative">
+              🛒
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs px-1 rounded-full">
+                  {cartCount}
+                </span>
+              )}
             </button>
-          )}
 
-          {/* Mobile Menu */}
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden flex items-center justify-center h-10 w-10 rounded-full border border-[#00000025] bg-white hover:scale-110 transition-all"
-          >
-            {isMenuOpen ? (
-              <X className="h-6 w-6 text-[#2A1A00]" />
+            {/* AUTH */}
+            {user ? (
+              <UserButton afterSignOutUrl="/" />
             ) : (
-              <Menu className="h-6 w-6 text-[#2A1A00]" />
+              <button onClick={() => openSignIn({})}>
+                <User />
+              </button>
             )}
-          </button>
-        </div>
-      </div>
 
-      {/* Mobile Dropdown */}
-      {isMenuOpen && (
+            {/* 🔥 VENDOR BUTTON */}
+            {user && !isVendor && (
+              <button
+                onClick={() => setShowVendorModal(true)}
+                className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-md hover:scale-105 transition"
+              >
+                Register as Vendor
+              </button>
+            )}
+
+            {/* 🔥 DASHBOARD */}
+            {user && isVendor && (
+              <Link
+                href="/Dashboard"
+                className="bg-black text-white px-4 py-2 rounded-full text-sm font-semibold hover:scale-105 transition"
+              >
+                Dashboard
+              </Link>
+            )}
+
+            {isMenuOpen && (
         <div className="md:hidden bg-white border-t border-[#E5C88A] shadow-md">
           <div className="flex flex-col items-center gap-6 py-5 text-[#2A1A00] font-medium text-base tracking-wide">
             {navLinks.map((link) => (
@@ -154,6 +142,83 @@ export default function Header() {
           </div>
         </div>
       )}
-    </header>
+          </div>
+        </div>
+      </header>
+
+      {/* 🔥 VENDOR MODAL */}
+{showVendorModal && (
+  <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 animate-fadeIn">
+
+    <div className="relative bg-white/90 backdrop-blur-xl rounded-3xl p-7 w-[90%] max-w-md shadow-2xl border border-gray-200">
+
+      {/* CLOSE BUTTON */}
+      <button
+        onClick={() => setShowVendorModal(false)}
+        className="absolute top-4 right-4 text-gray-500 hover:text-black transition"
+      >
+        <X />
+      </button>
+
+      {/* TITLE */}
+      <h2 className="text-2xl font-bold text-center mb-1">
+        Become a Vendor 🏪
+      </h2>
+      <p className="text-center text-gray-500 text-sm mb-5">
+        Start selling your products with Samagri
+      </p>
+
+      {/* FORM */}
+      <div className="space-y-4">
+        <input
+          placeholder="Shop Name"
+          className="w-full border border-gray-300 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400 transition"
+        />
+
+        <input
+          placeholder="City"
+          className="w-full border border-gray-300 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400 transition"
+        />
+
+        <input
+          placeholder="Phone Number"
+          className="w-full border border-gray-300 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400 transition"
+        />
+      </div>
+
+      {/* SUBMIT */}
+      <button
+        onClick={() => {
+          localStorage.setItem("isVendor", "true");
+          setIsVendor(true);
+          setShowVendorModal(false);
+
+          // Show success toast
+          const toast = document.createElement("div");
+          toast.innerText = "🎉 You are now a Vendor!";
+          toast.className =
+            "fixed bottom-6 right-6 bg-black text-white px-6 py-3 rounded-xl shadow-lg animate-slideUp";
+          document.body.appendChild(toast);
+
+          setTimeout(() => {
+            toast.remove();
+          }, 3000);
+        }}
+        className="w-full mt-6 bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 rounded-xl font-semibold shadow-md hover:scale-[1.03] active:scale-[0.97] transition"
+      >
+        Submit
+      </button>
+
+      {/* CANCEL */}
+      <button
+        onClick={() => setShowVendorModal(false)}
+        className="w-full mt-3 text-gray-500 hover:text-black transition"
+      >
+        Cancel
+      </button>
+    </div>
+  </div>
+)}
+    </>
   );
 }

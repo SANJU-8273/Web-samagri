@@ -8,6 +8,7 @@ import Providers from "../components/Providers";
 import SyncUser from "../components/SyncUser";
 import Script from "next/script";
 
+
 export const metadata = {
   title: "Samagri Store",
   description: "Premium Puja Samagri Store built with Next.js",
@@ -18,7 +19,7 @@ export default function RootLayout({ children }) {
     <ClerkProvider>
       <html lang="en" className="scroll-smooth">
         <body className="-mt-8 bg-[#ff5e19e0]">
-
+         
           {/* Razorpay script (IMPORTANT) */}
           <Script
             src="https://checkout.razorpay.com/v1/checkout.js"
