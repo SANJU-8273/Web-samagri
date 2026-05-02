@@ -10,17 +10,16 @@ export default function OrderSummary({
   buyNowItem,
 }) {
   const { cartItems } = useCart();
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
 
   const [placing, setPlacing] = useState(false);
   const [error, setError] = useState("");
 
-  const items = buyNowItem ? [buyNowItem] : cartItems;
+  const items = buyNowItem ? [buyNowItem] : cartItems || [];
 
-  const subtotal = items.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
+  const subtotal = items.reduce((sum, item) => {
+    return sum + Number(item.price || 0) * Number(item.quantity || 1);
+  }, 0);
 
   const gst = Math.round(subtotal * 0.05);
 
@@ -35,84 +34,103 @@ export default function OrderSummary({
 
   const total = subtotal + gst + shipping;
 
-const handlePlaceOrder = async () => {
-  try {
-    setPlacing(true);
-    setError("");
+  const handlePlaceOrder = async () => {
+    try {
+      setPlacing(true);
+      setError("");
 
-    if (!user) {
-      setError("Please login first");
-      return;
-    }
+      if (!isLoaded) {
+        setError("User loading...");
+        return;
+      }
 
-    if (!paymentMethod) {
-      setError("Please select payment method");
-      return;
-    }
+      if (!user) {
+        setError("Please login first");
+        return;
+      }
 
-    if (!deliveryMethod) {
-      setError("Please select delivery method");
-      return;
-    }
+      if (!paymentMethod) {
+        setError("Please select payment method");
+        return;
+      }
 
-    if (!items.length) {
-      setError("Cart is empty");
-      return;
-    }
+      if (!deliveryMethod) {
+        setError("Please select delivery method");
+        return;
+      }
 
-    if (!window.Razorpay) {
-      setError("Razorpay script load nahi hui");
-      return;
-    }
+      if (!items.length) {
+        setError("Cart is empty");
+        return;
+      }
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/create-order`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ amount: total }),
-    });
+      if (!process.env.NEXT_PUBLIC_API_URL) {
+        setError("NEXT_PUBLIC_API_URL missing hai");
+        return;
+      }
 
-    const data = await res.json();
+      if (!process.env.NEXT_PUBLIC_RAZORPAY_KEY) {
+        setError("NEXT_PUBLIC_RAZORPAY_KEY missing hai");
+        return;
+      }
 
-    if (!res.ok) {
-      throw new Error(data.message || "Payment API failed");
-    }
+      if (!window.Razorpay) {
+        setError("Razorpay script load nahi hui");
+        return;
+      }
 
-    const options = {
-      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY,
-      amount: data.amount,
-      currency: "INR",
-      name: "Samagri Store",
-      order_id: data.id,
-
-      handler: function (response) {
-        console.log("Payment Success", response);
-        alert("Payment Successful 🎉");
-      },
-
-      prefill: {
-        name: user?.fullName || "",
-        email: user?.primaryEmailAddress?.emailAddress || "",
-      },
-
-      theme: {
-        color: "#2563eb",
-      },
-    };
-
-    const razor = new window.Razorpay(options);
-    razor.open();
-  } catch (err) {
-    console.error("ERROR:", err);
-    setError(err.message || "Something went wrong");
-  } finally {
-    setPlacing(false);
+      const res = await fetch(
+  `${process.env.NEXT_PUBLIC_API_URL}/api/payment/create`,
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ amount: total }),
   }
-};
+);
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Payment API failed");
+      }
+
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY,
+        amount: data.amount,
+        currency: data.currency || "INR",
+        name: "Samagri Store",
+        description: "Order Payment",
+        order_id: data.id,
+
+        handler: function (response) {
+          console.log("Payment Success:", response);
+          alert("Payment Successful 🎉");
+        },
+
+        prefill: {
+          name: user?.fullName || "",
+          email: user?.primaryEmailAddress?.emailAddress || "",
+        },
+
+        theme: {
+          color: "#2563eb",
+        },
+      };
+
+      const razor = new window.Razorpay(options);
+      razor.open();
+    } catch (err) {
+      console.error("ERROR:", err);
+      setError(err.message || "Something went wrong");
+    } finally {
+      setPlacing(false);
+    }
+  };
+
   return (
     <div className="bg-white p-6 rounded-2xl border shadow-sm sticky top-24">
-
       <h2 className="text-xl font-semibold mb-6">Order Summary</h2>
 
       {error && (
@@ -122,9 +140,9 @@ const handlePlaceOrder = async () => {
       )}
 
       <div className="space-y-4 text-sm">
-
         <Row label="Subtotal" value={`₹${subtotal}`} />
         <Row label="GST (5%)" value={`₹${gst}`} />
+
         <Row
           label="Shipping"
           value={
@@ -135,6 +153,7 @@ const handlePlaceOrder = async () => {
               : `₹${shipping}`
           }
         />
+
         <Row label="Delivery" value={deliveryMethod || "Not Selected"} />
         <Row label="Payment" value={paymentMethod || "Not Selected"} />
 
@@ -146,18 +165,17 @@ const handlePlaceOrder = async () => {
         </div>
       </div>
 
-     <button
-  onClick={handlePlaceOrder}
-  disabled={placing}
-  className={`w-full mt-6 py-3 rounded-xl font-semibold transition-all
-    ${
-      placing
-        ? "bg-gray-400 cursor-not-allowed"
-        : "bg-blue-600 hover:bg-blue-700 text-white"
-    }`}
->
-  {placing ? "Placing..." : "Place Order"}
-</button>
+      <button
+        onClick={handlePlaceOrder}
+        disabled={placing}
+        className={`w-full mt-6 py-3 rounded-xl font-semibold transition-all ${
+          placing
+            ? "bg-gray-400 cursor-not-allowed"
+            : "bg-blue-600 hover:bg-blue-700 text-white"
+        }`}
+      >
+        {placing ? "Placing..." : "Place Order"}
+      </button>
 
       <p className="mt-4 text-xs text-center text-gray-500">
         Secure checkout • GST Included
