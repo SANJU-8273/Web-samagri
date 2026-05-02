@@ -13,10 +13,21 @@ export default function FeaturedProducts({ onAddToCart }) {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/products");
-        const data = await res.json();
+        const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-        setProducts(data.products || []);
+if (!API_URL) {
+  throw new Error("NEXT_PUBLIC_API_URL is missing");
+}
+
+const res = await fetch(`${API_URL}/api/products`);
+
+if (!res.ok) {
+  throw new Error(`API Error: ${res.status}`);
+}
+
+const data = await res.json();
+
+setProducts(data.products || data || []);
       } catch (err) {
         setError("Failed to load products");
         console.log(err);

@@ -20,7 +20,7 @@ import {
 import Link from "next/link";
 
 export default function ProductDetails(props) {
-  const { addToCart } = useCart(); // Hook inside component
+  const { addToCart } = useCart(); 
  const { user } = useUser();
 const { openSignIn } = useClerk();
 const router = useRouter();
@@ -29,18 +29,46 @@ const router = useRouter();
   // Get product
   const { id } = use(props.params);
 useEffect(() => {
-  const fetchProduct = async () => {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/${id}`);
-const data = await res.json();
-setActive(data.images?.[0]);  };
+const fetchProduct = async () => {
+  try {
+    if (!id) return;
+
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/products/${id}`
+    );
+
+    if (!res.ok) {
+      throw new Error("Failed to fetch product");
+    }
+
+    const data = await res.json();
+
+    setProduct(data); // ⭐⭐⭐ THIS WAS MISSING
+    setActive(data?.images?.[0] || null);
+
+  } catch (error) {
+    console.log("❌ Product fetch error:", error.message);
+  }
+};
 
 
   const fetchAllProducts = async () => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products`);
-const data = await res.json();
-    
-    setAllProducts(data.products || []);
-  };
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/products`
+    );
+
+    if (!res.ok) {
+      throw new Error("Failed to fetch products");
+    }
+
+    const data = await res.json();
+
+    setAllProducts(data?.products || []);
+  } catch (error) {
+    console.log("❌ All products error:", error.message);
+  }
+};
 
   fetchProduct();
   fetchAllProducts();

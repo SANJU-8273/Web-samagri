@@ -1,17 +1,27 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import ProductCard from "../../components/ProductCard";
 import CategorySection from "../../components/Categories";
 
 export default function ShopClient() {
   const searchParams = useSearchParams();
+  const router = useRouter();
+
   const categoryQuery = searchParams.get("category");
 
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const productSectionRef = useRef(null);
+
+  const normalize = (value) =>
+    String(value || "")
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, " ");
 
   const ultraSmoothScroll = (targetY) => {
     const startY = window.scrollY;
@@ -21,13 +31,13 @@ export default function ShopClient() {
 
     const animationStep = (currentTime) => {
       if (!startTime) startTime = currentTime;
-      const progress = currentTime - startTime;
 
-      const ease = 1 - Math.pow(1 - progress / duration, 3);
+      const progress = Math.min((currentTime - startTime) / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
 
       window.scrollTo(0, startY + distance * ease);
 
-      if (progress < duration) {
+      if (progress < 1) {
         requestAnimationFrame(animationStep);
       }
     };
@@ -38,13 +48,31 @@ export default function ShopClient() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products`);
-const data = await res.json();
+        setLoading(true);
 
-        setProducts(data.products || []);
-        setFilteredProducts(data.products || []);
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/products`
+        );
+
+        if (!res.ok) {
+          throw new Error("Products fetch failed");
+        }
+
+        const data = await res.json();
+
+        const productList = Array.isArray(data)
+          ? data
+          : data.products || [];
+
+        console.log("ALL PRODUCTS:", productList);
+        console.log("CATEGORY QUERY:", categoryQuery);
+
+        setProducts(productList);
       } catch (error) {
-        console.log(error);
+        console.log("Product fetch error:", error);
+        setProducts([]);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -52,24 +80,21 @@ const data = await res.json();
   }, []);
 
   useEffect(() => {
-    if (categoryQuery?.toLowerCase() === "custom combos") {
-      window.location.href = "/Customize";
-    }
-  }, [categoryQuery]);
-
-  useEffect(() => {
     if (!categoryQuery) {
       setFilteredProducts(products);
       return;
     }
 
-    if (categoryQuery.toLowerCase() === "custom combos") return;
+    if (normalize(categoryQuery) === "custom combos") {
+      router.push("/Customize");
+      return;
+    }
 
-    const updated = products.filter(
-      (p) =>
-        p.category.trim().toLowerCase() ===
-        categoryQuery.trim().toLowerCase()
-    );
+    const updated = products.filter((p) => {
+      return normalize(p.category) === normalize(categoryQuery);
+    });
+
+    console.log("FILTERED PRODUCTS:", updated);
 
     setFilteredProducts(updated);
 
@@ -83,7 +108,7 @@ const data = await res.json();
         ultraSmoothScroll(topPos);
       }
     }, 200);
-  }, [categoryQuery, products]);
+  }, [categoryQuery, products, router]);
 
   return (
     <div className="min-h-screen mx-auto container bg-[#FFF8E7]">
@@ -92,11 +117,15 @@ const data = await res.json();
       <div className="container mx-auto px-4 py-10" ref={productSectionRef}>
         <div className="text-center mb-12">
           <h1 className="text-[#5C1A1B] text-3xl md:text-4xl font-bold">
-            {categoryQuery ? categoryQuery : "Explore Our Collection"}
+            {categoryQuery || "Explore Our Collection"}
           </h1>
         </div>
 
-        {filteredProducts.length > 0 ? (
+        {loading ? (
+          <div className="text-center py-20">
+            <p className="text-gray-600">Loading products...</p>
+          </div>
+        ) : filteredProducts.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {filteredProducts.map((product) => (
               <ProductCard key={product._id} product={product} />

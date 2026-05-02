@@ -13,15 +13,36 @@ export default function CustomKitPage() {
 
   useEffect(() => {
     const fetchProducts = async () => {
-      try {
-        const res = await fetch("http://localhost:5000/api/products");
-        const data = await res.json();
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-        setProducts(data.products || data || []);
-      } catch (error) {
-        console.log("Products fetch error:", error);
-      }
-    };
+    if (!apiUrl) {
+      console.log("❌ API URL missing hai");
+      return;
+    }
+
+    const res = await fetch(`${apiUrl}/api/products`);
+
+    if (!res.ok) {
+      throw new Error(`Server error: ${res.status}`);
+    }
+
+    const data = await res.json();
+
+    // ✅ Safe handling of response
+    if (Array.isArray(data)) {
+      setProducts(data);
+    } else if (Array.isArray(data.products)) {
+      setProducts(data.products);
+    } else {
+      console.log("⚠️ Unexpected response format:", data);
+      setProducts([]);
+    }
+
+  } catch (error) {
+    console.log("❌ Products fetch error:", error.message);
+  }
+};
 
     fetchProducts();
   }, []);
