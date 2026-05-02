@@ -11,12 +11,7 @@ export default function SyncUser() {
 
     const sendUser = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
-        if (!apiUrl) {
-          console.log("❌ NEXT_PUBLIC_API_URL missing hai");
-          return;
-        }
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
         const res = await fetch(`${apiUrl}/api/sync-user`, {
           method: "POST",

@@ -33,8 +33,8 @@ const fetchProduct = async () => {
   try {
     if (!id) return;
 
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/products/${id}`
+const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/products/${id}`
     );
 
     if (!res.ok) {
@@ -54,8 +54,8 @@ const fetchProduct = async () => {
 
   const fetchAllProducts = async () => {
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/products`
+const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/products`
     );
 
     if (!res.ok) {

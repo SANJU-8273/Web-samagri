@@ -13,13 +13,8 @@ export default function CustomKitPage() {
 
   useEffect(() => {
     const fetchProducts = async () => {
-  try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
-    if (!apiUrl) {
-      console.log("❌ API URL missing hai");
-      return;
-    }
+try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
     const res = await fetch(`${apiUrl}/api/products`);
 

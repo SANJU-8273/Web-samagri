@@ -50,8 +50,8 @@ export default function ShopClient() {
       try {
         setLoading(true);
 
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/products`
+const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/products`
         );
 
         if (!res.ok) {

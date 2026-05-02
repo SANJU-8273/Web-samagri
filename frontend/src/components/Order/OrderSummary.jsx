@@ -64,12 +64,10 @@ export default function OrderSummary({
         return;
       }
 
-      if (!process.env.NEXT_PUBLIC_API_URL) {
-        setError("NEXT_PUBLIC_API_URL missing hai");
-        return;
-      }
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+      const RAZORPAY_KEY = process.env.NEXT_PUBLIC_RAZORPAY_KEY;
 
-      if (!process.env.NEXT_PUBLIC_RAZORPAY_KEY) {
+      if (!RAZORPAY_KEY) {
         setError("NEXT_PUBLIC_RAZORPAY_KEY missing hai");
         return;
       }
@@ -80,7 +78,7 @@ export default function OrderSummary({
       }
 
       const res = await fetch(
-  `${process.env.NEXT_PUBLIC_API_URL}/api/payment/create`,
+  `${API_URL}/api/payment/create`,
   {
     method: "POST",
     headers: {
@@ -97,7 +95,7 @@ export default function OrderSummary({
       }
 
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY,
+key: RAZORPAY_KEY,
         amount: data.amount,
         currency: data.currency || "INR",
         name: "Samagri Store",

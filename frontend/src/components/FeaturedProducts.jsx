@@ -13,11 +13,7 @@ export default function FeaturedProducts({ onAddToCart }) {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-if (!API_URL) {
-  throw new Error("NEXT_PUBLIC_API_URL is missing");
-}
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 const res = await fetch(`${API_URL}/api/products`);
 
