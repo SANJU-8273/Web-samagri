@@ -38,8 +38,8 @@ export default function ShopClient() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/products");
-        const data = await res.json();
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products`);
+const data = await res.json();
 
         setProducts(data.products || []);
         setFilteredProducts(data.products || []);

@@ -65,7 +65,7 @@ const handlePlaceOrder = async () => {
       return;
     }
 
-    const res = await fetch("http://localhost:5000/api/payment/create", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/create-order`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

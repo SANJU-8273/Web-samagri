@@ -13,7 +13,7 @@ export default function SyncUser() {
       try {
         console.log("➡️ Sending user to backend...");
 
-        const res = await fetch("http://localhost:5000/api/users/sync", {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sync-user`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

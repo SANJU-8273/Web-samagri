@@ -30,14 +30,15 @@ const router = useRouter();
   const { id } = use(props.params);
 useEffect(() => {
   const fetchProduct = async () => {
-    const res = await fetch(`http://localhost:5000/api/products/${id}`);
-    const data = await res.json();
-setProduct(data);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/${id}`);
+const data = await res.json();
 setActive(data.images?.[0]);  };
 
+
   const fetchAllProducts = async () => {
-    const res = await fetch("http://localhost:5000/api/products");
-    const data = await res.json();
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products`);
+const data = await res.json();
+    
     setAllProducts(data.products || []);
   };
 

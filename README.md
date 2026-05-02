@@ -123,7 +123,8 @@ npm run dev
 
 ### 🌐 Runs on:
 - Frontend → http://localhost:3000  
-- Backend → http://localhost:5000  
+- Backend → const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products`);
+const data = await res.json();
 
 ---
 
