@@ -24,6 +24,7 @@ app.use(
     origin: [
       "http://localhost:3000",
       "https://samagri-store.vercel.app",
+      "https://web-samagri.vercel.app"
     ],
     credentials: true,
   })
